@@ -1,5 +1,5 @@
 from django.contrib import admin
-from models import Amenities, Services, OperationHours, Comments, Barbershop, Profile
+from .models import Amenities, Services, OperationHours, Comments, Barbershop, Profile
 
 # Register your models here.
 admin.site.register(Amenities)

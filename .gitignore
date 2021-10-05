@@ -2,3 +2,5 @@ venv
 .python-version
 .env
 *.sqlite3
+
+__pycache__

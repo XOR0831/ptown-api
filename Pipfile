@@ -8,9 +8,12 @@ django = "*"
 django-heroku = "*"
 djangorestframework = "*"
 gunicorn = "*"
-drf-yasg = "*"
 django-googledrive-storage = "*"
 pillow = "*"
+djangorestframework-simplejwt = "==4.8.0"
+drf-spectacular = {extras = ["sidecar"], version = "*"}
+pyjwt = "==2.1.0"
+django-filter = "*"
 
 [dev-packages]
 

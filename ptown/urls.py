@@ -17,10 +17,12 @@ from django.contrib import admin
 from django.conf.urls import url
 from django.urls import path
 from django.urls.conf import include
-from drf_yasg.views import get_schema_view
-from drf_yasg import openapi
-from rest_framework import permissions
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework.routers import DefaultRouter
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+)
 from api import views
 
 router = DefaultRouter()
@@ -30,21 +32,14 @@ router.register(r'operation_hours', views.OperationHoursViewSet, basename='opera
 router.register(r'comments', views.CommentsViewSet, basename='comments')
 router.register(r'barbershop', views.BarbershopViewSet, basename='barbershop')
 router.register(r'profile', views.ProfileViewSet, basename='profile')
+router.register(r'users', views.UsersViewSet, basename='user')
 
-schema_view = get_schema_view(
-    openapi.Info(
-        title="PTown API",
-        default_version='v1',
-        description="API for PTown",
-        terms_of_service="https://www.google.com/policies/terms/",
-        license=openapi.License(name="MIT License"),
-    ),
-    public=True,
-    permission_classes=[permissions.AllowAny],
-)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    url(r'^$', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
-    path('api/', include(router.urls))
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('api/', include(router.urls)),
+    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
 ]

@@ -3,10 +3,12 @@ from rest_framework import serializers
 from .models import Amenities, Services, OperationHours, Comments, Barbershop, Profile
 
 
-class UserSerializer(serializers.ModelSerializer):
+class UserFavoritesSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = "__all__"
+        fields = [
+            "id"
+        ]
 
 
 class UserListSerializer(serializers.ModelSerializer):
@@ -48,6 +50,7 @@ class UserUpdateSerializer(serializers.ModelSerializer):
 
 
 class AmenitiesSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(validators=[])
     class Meta:
         model = Amenities
         fields = "__all__"
@@ -76,7 +79,7 @@ class BarbershopSerializer(serializers.ModelSerializer):
     services = ServicesSerializer(many=True)
     hours = OperationHoursSerializer(many=True)
     comments = CommentsSerializer(many=True)
-    favorites = UserSerializer(many=True)
+    favorites = UserListSerializer(many=True)
 
     class Meta:
         model = Barbershop
@@ -112,7 +115,7 @@ class BarbershopListSerializer(serializers.ModelSerializer):
     services = ServicesSerializer(many=True)
     hours = OperationHoursSerializer(many=True)
     comments = CommentsSerializer(many=True)
-    favorites = UserSerializer(many=True)
+    favorites = UserListSerializer(many=True)
 
     class Meta:
         model = Barbershop
@@ -124,43 +127,55 @@ class BarbershopUpdateSerializer(serializers.ModelSerializer):
     services = ServicesSerializer(many=True, required=False)
     hours = OperationHoursSerializer(many=True, required=False)
     comments = CommentsSerializer(many=True, required=False)
-    favorites = UserSerializer(many=True, required=False)
+    favorites = UserFavoritesSerializer(many=True, required=False)
 
     class Meta:
         model = Barbershop
         fields = "__all__"
 
-    def save(self, validated_data):
-        amenities_data = validated_data.pop('amenities')
-        services_data = validated_data.pop('services')
-        hours_data = validated_data.pop('hours')
-        comments_data = validated_data.pop('comments')
-        for amenities_item in amenities_data:
-            amenities = AmenitiesSerializer(data=amenities_item)
-            amenities.is_valid(raise_exception=True)
-            amenity = amenities.save()
-            self.instance.amenities.add(amenity)
-        for services_item in services_data:
-            services = ServicesSerializer(data=services_item)
-            services.is_valid(raise_exception=True)
-            service = services.save()
-            self.instance.services.add(service)
-        for hours_item in hours_data:
-            hours = OperationHoursSerializer(data=hours_item)
-            hours.is_valid(raise_exception=True)
-            hour = hours.save()
-            self.instance.hours.add(hour)
-        for comments_item in comments_data:
-            comments = CommentsSerializer(data=comments_item)
-            comments.is_valid(raise_exception=True)
-            comment = comments.save()
-            self.instance.comments.add(comment)
+    def save(self):
+        amenities_data = self.validated_data.get('amenities')
+        services_data = self.validated_data.get('services')
+        hours_data = self.validated_data.get('hours')
+        comments_data = self.validated_data.get('comments')
+        if amenities_data:
+            for amenities_item in amenities_data:
+                if amenities_item.get("name"):
+                    if Amenities.objects.filter(name=amenities_item.get("name")).exists():
+                        amenity = Amenities.objects.get(name=amenities_item.get("name"))
+                    else:
+                        amenity = Amenities.objects.create(**amenities_item)
+                    self.instance.amenities.add(amenity)
+        if services_data:
+            for services_item in services_data:
+                if services_item.get("name") and services_item.get("price"):
+                    if Services.objects.filter(name=services_item.get("name"), price=services_item.get("price")).exists():
+                        service = Services.objects.get(name=services_item.get("name"), price=services_item.get("price"))
+                    else:
+                        service = Services.objects.create(**services_item)
+                    self.instance.services.add(service)
+        if hours_data:
+            for hours_item in hours_data:
+                if hours_item.get("day") and hours_item.get("opening_time") and hours_item.get("closing_time"):
+                    if OperationHours.objects.filter(day=hours_item.get("day"), opening_time=hours_item.get("opening_time"), closing_time=hours_item.get("closing_time")).exists():
+                        hour = OperationHours.objects.get(day=hours_item.get("day"), opening_time=hours_item.get("opening_time"), closing_time=hours_item.get("closing_time"))
+                    else:
+                        hour = OperationHours.objects.create(**hours_item)
+                    self.instance.hours.add(hour)
+        if comments_data: 
+            for comments_item in comments_data:
+                if comments_item.get("text") and comments_item.get("rating") and comments_item.get("type"):
+                    if Comments.objects.filter(text=comments_item.get("text"), rating=comments_item.get("rating"), type=comments_item.get("type")).exists():
+                        comment = Comments.objects.get(text=comments_item.get("text"), rating=comments_item.get("rating"), type=comments_item.get("type"))
+                    else:
+                        comment = Comments.objects.create(**comments_item)
+                    self.instance.comments.add(comment)
         self.instance.save()
         return self.instance
 
 
 class ProfileSerializer(serializers.ModelSerializer):
-    user =  UserSerializer()
+    user =  UserListSerializer()
     barbershop = BarbershopSerializer(many=True)
 
     class Meta:

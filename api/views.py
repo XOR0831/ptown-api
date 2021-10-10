@@ -4,13 +4,11 @@ from drf_spectacular.utils import extend_schema
 from rest_framework import status, viewsets
 from rest_framework.response import Response
 from .serializers import (
-    # Users
-    UserSerializer,
-    UserListSerializer,
-    UserCreateSerializer,
-    UserUpdateSerializer,
     # Barbershop
     BarbershopSerializer, 
+    BarbershopListSerializer,
+    BarbershopCreateSerializer,
+    BarbershopUpdateSerializer,
     # Profile
     ProfileSerializer,
     ProfileListSerializer,
@@ -22,30 +20,30 @@ from .models import (
     Profile
 )
 
-class UserFilter(filters.FilterSet):
+
+class BarbershopFilter(filters.FilterSet):
 
     class Meta:
-        model = User
-        fields = ["username", "first_name", "last_name", "email"]
+        model = Barbershop
+        fields = ["name", "address", "rating"]
 
 
-# Create your views here.
-class UsersViewSet(viewsets.ModelViewSet):
+class BarbershopViewSet(viewsets.ModelViewSet):
     """
     A viewset that provides the standard actions for Amenities object
     """
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
+    queryset = Barbershop.objects.all()
+    serializer_class = BarbershopSerializer
     filter_backends = (filters.DjangoFilterBackend,)
-    filterset_class = UserFilter
+    filterset_class = BarbershopFilter
     http_method_names = ['get', 'post', 'patch', 'delete', 'head', 'options', 'trace']
 
     @extend_schema(
-        request=UserCreateSerializer,
-        responses={201: UserSerializer}
+        request=BarbershopCreateSerializer,
+        responses={201: BarbershopSerializer}
     )
     def create(self, request, *args, **kwargs):
-        serializer = UserCreateSerializer(data=request.data)
+        serializer = BarbershopCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         response_serializer = self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
@@ -53,29 +51,29 @@ class UsersViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         instance = serializer.save()
-        return UserSerializer(instance)
+        return BarbershopSerializer(instance)
 
     @extend_schema(
-        responses={200: UserListSerializer}
+        responses={200: BarbershopListSerializer}
     )
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
 
         page = self.paginate_queryset(queryset)
         if page is not None:
-            serializer = UserListSerializer(page, many=True)
+            serializer = BarbershopListSerializer(page, many=True)
             return self.get_paginated_response(serializer.data)
 
-        serializer = UserListSerializer(queryset, many=True)
+        serializer = BarbershopListSerializer(queryset, many=True)
         return Response(serializer.data)
 
     @extend_schema(
-        request=UserUpdateSerializer,
-        responses={200: UserSerializer}
+        request=BarbershopUpdateSerializer,
+        responses={200: BarbershopSerializer}
     )
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
-        serializer = UserUpdateSerializer(instance, data=request.data, partial=True)
+        serializer = BarbershopUpdateSerializer(instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         response_serializer = self.perform_update(serializer)
 
@@ -88,15 +86,14 @@ class UsersViewSet(viewsets.ModelViewSet):
 
     def perform_update(self, serializer):
         instance = serializer.save()
-        return UserSerializer(instance)
-
-
-class BarbershopViewSet(viewsets.ModelViewSet):
-    """
-    A viewset that provides the standard actions for Amenities object
-    """
-    queryset = Barbershop.objects.all()
-    serializer_class = BarbershopSerializer
+        return BarbershopSerializer(instance)
+    
+    @extend_schema(
+        request=BarbershopUpdateSerializer,
+        responses={200: BarbershopSerializer}
+    )
+    def partial_update(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
 
 
 class ProfileFilter(filters.FilterSet):

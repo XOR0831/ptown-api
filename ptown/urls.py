@@ -28,7 +28,6 @@ from api import views
 router = DefaultRouter()
 router.register(r'barbershop', views.BarbershopViewSet, basename='barbershop')
 router.register(r'profile', views.ProfileViewSet, basename='profile')
-router.register(r'users', views.UsersViewSet, basename='user')
 
 
 urlpatterns = [

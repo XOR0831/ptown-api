@@ -26,10 +26,6 @@ from rest_framework_simplejwt.views import (
 from api import views
 
 router = DefaultRouter()
-router.register(r'amenities', views.AmenitiesViewSet, basename='amenities')
-router.register(r'services', views.ServicesViewSet, basename='services')
-router.register(r'operation_hours', views.OperationHoursViewSet, basename='operation_hours')
-router.register(r'comments', views.CommentsViewSet, basename='comments')
 router.register(r'barbershop', views.BarbershopViewSet, basename='barbershop')
 router.register(r'profile', views.ProfileViewSet, basename='profile')
 router.register(r'users', views.UsersViewSet, basename='user')

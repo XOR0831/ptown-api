@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from django_filters import rest_framework as filters
 from drf_spectacular.utils import extend_schema
-from rest_framework import status, viewsets
+from rest_framework import status, viewsets, permissions
 from rest_framework.response import Response
 from .serializers import (
     # Barbershop
@@ -109,6 +109,7 @@ class ProfileViewSet(viewsets.ModelViewSet):
     """
     queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
+    permission_classes = [permissions.AllowAny]
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = ProfileFilter
     http_method_names = ['get', 'post', 'patch', 'delete', 'head', 'options', 'trace']

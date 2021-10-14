@@ -33,6 +33,16 @@ class UserCreateSerializer(serializers.ModelSerializer):
             "password"
         ]
 
+    def create(self, validated_data):
+        user = User.objects.create(
+            username=validated_data["username"],
+            first_name=validated_data["first_name"],
+            last_name=validated_data["last_name"],
+            email=validated_data["email"],
+            password=validated_data["password"],
+        )
+        return user
+
 
 class UserUpdateSerializer(serializers.ModelSerializer):
     first_name = serializers.CharField(allow_blank=True, allow_null=True)

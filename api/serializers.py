@@ -253,7 +253,7 @@ class ProfileUpdateSerializer(serializers.ModelSerializer):
                 if Barbershop.objects.filter(id=barbershops_item["id"]).exists():
                     barbershop = Barbershop.objects.get(id=barbershops_item["id"])
                     self.instance.barbershop.add(barbershop)
-        users_data = self.validated_data.pop('user')
+        users_data = self.validated_data.get('user')
         if users_data:
             user = self.instance.user
             if users_data.get("first_name", None):

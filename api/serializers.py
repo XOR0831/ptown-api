@@ -254,15 +254,16 @@ class ProfileUpdateSerializer(serializers.ModelSerializer):
                     barbershop = Barbershop.objects.get(id=barbershops_item["id"])
                     self.instance.barbershop.add(barbershop)
         users_data = self.validated_data.pop('user')
-        user = self.instance.user
-        if users_data.get("first_name", None):
-            user.first_name = users_data.get("first_name")
-        if users_data.get("last_name", None):
-            user.last_name = users_data.get("last_name")
-        if users_data.get("email", None):
-            user.email = users_data.get("email")
-        if users_data.get("password", None):
-            user.set_password(users_data.get("password"))
-        user.save()
+        if users_data:
+            user = self.instance.user
+            if users_data.get("first_name", None):
+                user.first_name = users_data.get("first_name")
+            if users_data.get("last_name", None):
+                user.last_name = users_data.get("last_name")
+            if users_data.get("email", None):
+                user.email = users_data.get("email")
+            if users_data.get("password", None):
+                user.set_password(users_data.get("password"))
+            user.save()
         self.instance.save()
         return self.instance

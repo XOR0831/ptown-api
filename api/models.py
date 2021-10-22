@@ -59,6 +59,8 @@ class Comments(models.Model):
     text = models.TextField()
     rating = models.FloatField()
     type = models.CharField(max_length=8)
+    created = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(User, on_delete=models.DO_NOTHING)
 
     def __str__(self) -> str:
         return self.text

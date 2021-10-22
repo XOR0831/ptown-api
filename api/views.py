@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from django_filters import rest_framework as filters
 from drf_spectacular.utils import extend_schema
 from rest_framework import status, viewsets, permissions
+from rest_framework.decorators import action
 from rest_framework.response import Response
 from .serializers import (
     # Barbershop
@@ -13,7 +14,8 @@ from .serializers import (
     ProfileSerializer,
     ProfileListSerializer,
     ProfileCreateSerializer,
-    ProfileUpdateSerializer
+    ProfileUpdateSerializer,
+    UserFavoritesSerializer
 )
 from .models import (
     Barbershop, 
@@ -73,7 +75,7 @@ class BarbershopViewSet(viewsets.ModelViewSet):
     )
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
-        serializer = BarbershopUpdateSerializer(instance, data=request.data, partial=True)
+        serializer = BarbershopUpdateSerializer(instance, data=request.data, partial=True, context={'request': request})
         serializer.is_valid(raise_exception=True)
         response_serializer = self.perform_update(serializer)
 
@@ -94,6 +96,38 @@ class BarbershopViewSet(viewsets.ModelViewSet):
     )
     def partial_update(self, request, *args, **kwargs):
         return self.update(request, *args, **kwargs)
+
+    @extend_schema(
+        description='Add User in Favorites', 
+        methods=["POST"],
+        request=None,
+        responses=BarbershopListSerializer
+    )
+    @action(detail=True, methods=['POST'])
+    def add_favorite_user(self, request, pk=None):
+        barbershop = Barbershop.objects.get(pk=pk)
+        barbershop.favorites.add(request.user)
+        barbershop.save()
+        barbers = request.user.favorites.all()
+        return Response(BarbershopListSerializer(barbers, many=True).data, status=status.HTTP_200_OK)
+
+    @extend_schema(
+        request=None,
+        responses=BarbershopListSerializer
+    )
+    @action(detail=False, methods=['GET'])
+    def favorite_user(self, request):
+        barbershops = request.user.favorites.all()
+        return Response(BarbershopListSerializer(barbershops, many=True).data, status=status.HTTP_200_OK)
+
+    @extend_schema(
+        request=None,
+        responses=BarbershopListSerializer
+    )
+    @action(detail=False, methods=['GET'])
+    def barbershop_of_the_month(self, request):
+        barbershop = Barbershop.objects.order_by("-rating").first()
+        return Response(BarbershopListSerializer(barbershop).data, status=status.HTTP_200_OK)
 
 
 class ProfileFilter(filters.FilterSet):

@@ -83,7 +83,11 @@ class OperationHoursSerializer(serializers.ModelSerializer):
 class CommentsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comments
-        fields = "__all__"
+        fields = [
+            "text",
+            "rating",
+            "type"
+        ]
 
 
 class BarbershopSerializer(serializers.ModelSerializer):
@@ -177,11 +181,26 @@ class BarbershopUpdateSerializer(serializers.ModelSerializer):
         if comments_data: 
             for comments_item in comments_data:
                 if comments_item.get("text") and comments_item.get("rating") and comments_item.get("type"):
-                    if Comments.objects.filter(text=comments_item.get("text"), rating=comments_item.get("rating"), type=comments_item.get("type")).exists():
-                        comment = Comments.objects.get(text=comments_item.get("text"), rating=comments_item.get("rating"), type=comments_item.get("type"))
+                    user =  self.context['request'].user
+                    if Comments.objects.filter(text=comments_item.get("text"), rating=comments_item.get("rating"), type=comments_item.get("type"), user=user).exists():
+                        comment = Comments.objects.get(text=comments_item.get("text"), rating=comments_item.get("rating"), type=comments_item.get("type"), user=user)
                     else:
-                        comment = Comments.objects.create(**comments_item)
+                        comment = Comments.objects.create(
+                            text=comments_item.get("text"), 
+                            rating=comments_item.get("rating"), 
+                            type=comments_item.get("type"),
+                            user=user
+                        )
                     self.instance.comments.add(comment)
+
+                    comments = self.instance.comments.all()
+
+                    tally = 0
+                    count = 1
+                    for comment in comments:
+                        tally += comment.rating
+                        count += 1
+                    self.instance.rating = round(tally / count, 2)
         self.instance.save()
         return self.instance
 

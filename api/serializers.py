@@ -82,13 +82,10 @@ class OperationHoursSerializer(serializers.ModelSerializer):
 
 
 class CommentsSerializer(serializers.ModelSerializer):
+    user = UserListSerializer(read_only=True)
     class Meta:
         model = Comments
-        fields = [
-            "text",
-            "rating",
-            "type"
-        ]
+        fields = "__all__"
 
 
 class BarbershopSerializer(serializers.ModelSerializer):

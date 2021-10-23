@@ -106,7 +106,10 @@ class BarbershopViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['POST'])
     def add_favorite_user(self, request, pk=None):
         barbershop = Barbershop.objects.get(pk=pk)
-        barbershop.favorites.add(request.user)
+        if request.user in barbershop.favorites.all():
+            barbershop.favorites.remove(request.user)
+        else:
+            barbershop.favorites.add(request.user)
         barbershop.save()
         barbers = request.user.favorites.all()
         return Response(BarbershopListSerializer(barbers, many=True).data, status=status.HTTP_200_OK)

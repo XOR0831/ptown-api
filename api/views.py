@@ -4,6 +4,8 @@ from drf_spectacular.utils import extend_schema
 from rest_framework import status, viewsets, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework_simplejwt.views import TokenObtainPairView
+
 from .serializers import (
     # Barbershop
     BarbershopSerializer, 
@@ -15,12 +17,18 @@ from .serializers import (
     ProfileListSerializer,
     ProfileCreateSerializer,
     ProfileUpdateSerializer,
-    UserFavoritesSerializer
+    UserFavoritesSerializer,
+    # Token
+    MyTokenObtainPairSerializer
 )
 from .models import (
     Barbershop, 
     Profile
 )
+
+
+class MyTokenObtainPairView(TokenObtainPairView):
+    serializer_class = MyTokenObtainPairSerializer
 
 
 class BarbershopFilter(filters.FilterSet):

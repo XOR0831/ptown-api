@@ -1,6 +1,20 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from .models import Amenities, Services, OperationHours, Comments, Barbershop, Profile
+
+
+class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+    def validate(self, attrs):
+        data = super().validate(attrs)
+        refresh = self.get_token(self.user)
+        data['refresh'] = str(refresh)
+        data['access'] = str(refresh.access_token)
+
+        # Add extra responses here
+        data['id'] = self.user.id
+        return data
+
 
 
 class UserFavoritesSerializer(serializers.ModelSerializer):
@@ -45,7 +59,6 @@ class UserCreateSerializer(serializers.ModelSerializer):
         user.set_password(validated_data["password"])
         return user
     
-
 
 class UserUpdateSerializer(serializers.ModelSerializer):
     first_name = serializers.CharField(allow_blank=True, allow_null=True)
@@ -239,7 +252,6 @@ class ProfileCreateSerializer(serializers.ModelSerializer):
             account_type=validated_data.get("account_type", None)
         )
         return instance
-
 
 
 class ProfileListSerializer(serializers.ModelSerializer):

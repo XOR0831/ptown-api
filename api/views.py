@@ -5,7 +5,6 @@ from rest_framework import serializers, status, viewsets, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
-
 from .serializers import (
     # Barbershop
     AppointmentsSerializer,
@@ -13,6 +12,9 @@ from .serializers import (
     BarbershopListSerializer,
     BarbershopCreateSerializer,
     BarbershopUpdateSerializer,
+    MessagesCreateSerializer,
+    MessagesListSerializer,
+    MessagesUserSerializer,
     # Profile
     ProfileSerializer,
     ProfileListSerializer,
@@ -166,6 +168,50 @@ class BarbershopViewSet(viewsets.ModelViewSet):
     def get_appointment(self, request, pk=None):
         barbershops = Barbershop.objects.get(pk=pk).appointments.all()
         return Response(AppointmentsSerializer(barbershops, many=True).data, status=status.HTTP_200_OK)
+
+    @extend_schema(
+        description='Add Message', 
+        methods=["POST"],
+        request=MessagesCreateSerializer,
+        responses=MessagesListSerializer
+    )
+    @action(detail=True, methods=['POST'])
+    def add_message(self, request, pk=None):
+        serializer = MessagesCreateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        message = serializer.save()
+        barbershop = Barbershop.objects.get(pk=pk)
+        barbershop.messages.add(message)
+        barbershop.save()
+        barber = barbershop.messages.filter(user=message.user).order_by("created")
+        return Response(MessagesListSerializer(barber, many=True).data, status=status.HTTP_200_OK)
+
+    @extend_schema(
+        request=MessagesUserSerializer,
+        responses=MessagesListSerializer
+    )
+    @action(detail=True, methods=['POST'])
+    def messages_thread(self, request, pk=None):
+        serializer = MessagesUserSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = User.objects.get(pk=serializer.validated_data.get("user"))
+        messages = Barbershop.objects.get(pk=pk).messages.filter(user=user).order_by("created")
+        return Response(MessagesListSerializer(messages, many=True).data, status=status.HTTP_200_OK)
+
+    @extend_schema(
+        request=None,
+        responses=None
+    )
+    @action(detail=True, methods=['GET'])
+    def messages_barber(self, request, pk=None):
+        data = {}
+        messages = Barbershop.objects.get(pk=pk).messages.all()
+        for message in messages:
+            name = "{} {}".format(message.user.first_name, message.user.last_name)
+            if not name in data:
+                data[name] = []
+            data[name].append(MessagesListSerializer(message).data)
+        return Response(data, status=status.HTTP_200_OK)
 
 
 class ProfileFilter(filters.FilterSet):

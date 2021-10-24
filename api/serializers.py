@@ -1,5 +1,4 @@
 from django.contrib.auth.models import User
-from django.core.checks import messages
 from django.db.models import Q
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
@@ -119,11 +118,34 @@ class AppointmentsSerializer(serializers.ModelSerializer):
         return data
         
 
-class MessagesCreateSerializer(serializers.ModelSerializer):
-    user = UserFavoritesSerializer()
+class MessagesUserSerializer(serializers.ModelSerializer):
+    user = serializers.IntegerField()
     class Meta:
         model = Message
-        fields = "__all__"
+        fields = [
+            "user"
+        ]
+
+
+class MessagesCreateSerializer(serializers.ModelSerializer):
+    user = serializers.IntegerField()
+    class Meta:
+        model = Message
+        fields = [
+            "origin",
+            "text",
+            "user"
+        ]
+
+    def create(self, data):
+        user = User.objects.get(pk=data["user"])
+        instance = Message.objects.create(
+            user=user,
+            text=data["text"],
+            origin=data["origin"]
+        )
+
+        return instance
 
 
 class MessagesListSerializer(serializers.ModelSerializer):

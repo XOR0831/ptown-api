@@ -1,7 +1,9 @@
 from django.contrib.auth.models import User
+from django.core.checks import messages
+from django.db.models import Q
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from .models import Amenities, Services, OperationHours, Comments, Barbershop, Profile
+from .models import Amenities, Appointment, Message, Services, OperationHours, Comments, Barbershop, Profile
 
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -101,12 +103,44 @@ class CommentsSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class AppointmentsSerializer(serializers.ModelSerializer):
+    user = UserListSerializer(read_only=True)
+    class Meta:
+        model = Appointment
+        fields = "__all__"
+
+    def validate(self, data):
+        user =  self.context['request'].user
+        if Appointment.objects.filter(
+            Q(date=data["date"], time=data["time"]) |
+            Q(date=data["date"], user=user)
+        ).exists():
+            raise serializers.ValidationError("There is an existing appointment")
+        return data
+        
+
+class MessagesCreateSerializer(serializers.ModelSerializer):
+    user = UserFavoritesSerializer()
+    class Meta:
+        model = Message
+        fields = "__all__"
+
+
+class MessagesListSerializer(serializers.ModelSerializer):
+    user = UserListSerializer(read_only=True)
+    class Meta:
+        model = Message
+        fields = "__all__"
+
+
 class BarbershopSerializer(serializers.ModelSerializer):
     amenities = AmenitiesSerializer(many=True)
     services = ServicesSerializer(many=True)
     hours = OperationHoursSerializer(many=True)
     comments = CommentsSerializer(many=True)
     favorites = UserListSerializer(many=True)
+    appointments = AppointmentsSerializer(many=True)
+    messages = MessagesListSerializer(many=True)
 
     class Meta:
         model = Barbershop

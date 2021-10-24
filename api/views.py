@@ -1,13 +1,14 @@
 from django.contrib.auth.models import User
 from django_filters import rest_framework as filters
 from drf_spectacular.utils import extend_schema
-from rest_framework import status, viewsets, permissions
+from rest_framework import serializers, status, viewsets, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 from .serializers import (
     # Barbershop
+    AppointmentsSerializer,
     BarbershopSerializer, 
     BarbershopListSerializer,
     BarbershopCreateSerializer,
@@ -139,6 +140,32 @@ class BarbershopViewSet(viewsets.ModelViewSet):
     def barbershop_of_the_month(self, request):
         barbershop = Barbershop.objects.order_by("-rating").first()
         return Response(BarbershopListSerializer(barbershop).data, status=status.HTTP_200_OK)
+
+    @extend_schema(
+        description='Add Appointment', 
+        methods=["POST"],
+        request=AppointmentsSerializer,
+        responses=BarbershopSerializer
+    )
+    @action(detail=True, methods=['POST'])
+    def add_appointment(self, request, pk=None):
+        serializer = AppointmentsSerializer(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        appointment = serializer.save(user=request.user)
+        barbershop = Barbershop.objects.get(pk=pk)
+        barbershop.appointments.add(appointment)
+        barbershop.save()
+        barber = barbershop.appointments.all()
+        return Response(AppointmentsSerializer(barber, many=True).data, status=status.HTTP_200_OK)
+
+    @extend_schema(
+        request=None,
+        responses=AppointmentsSerializer
+    )
+    @action(detail=True, methods=['GET'])
+    def get_appointment(self, request, pk=None):
+        barbershops = Barbershop.objects.get(pk=pk).appointments.all()
+        return Response(AppointmentsSerializer(barbershops, many=True).data, status=status.HTTP_200_OK)
 
 
 class ProfileFilter(filters.FilterSet):

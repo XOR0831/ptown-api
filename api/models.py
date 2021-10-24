@@ -70,6 +70,33 @@ class Comments(models.Model):
         verbose_name_plural = "Comments"
 
 
+class Appointment(models.Model):
+    user = models.ForeignKey(User, on_delete=models.DO_NOTHING)
+    date = models.DateField()
+    time = models.TimeField()
+
+    def __str__(self) -> str:
+        return "{}: {} - {}".format(self.user.username, self.date.strftime("%A %d"), self.time.strftime("%H:%M")) 
+
+    class Meta:
+        verbose_name = "Appointment"
+        verbose_name_plural = "Appointments"
+
+
+class Message(models.Model):
+    user = models.ForeignKey(User, on_delete=models.DO_NOTHING)
+    origin = models.CharField(max_length=5)
+    created = models.DateTimeField(auto_now_add=True)
+    text = models.TextField()
+
+    def __str__(self) -> str:
+        return "{}: {} - {}".format(self.user.username, self.origin, self.text) 
+
+    class Meta:
+        verbose_name = "Message"
+        verbose_name_plural = "Messages"
+
+
 class Barbershop(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField(null=True, blank=True)
@@ -85,6 +112,8 @@ class Barbershop(models.Model):
     hours = models.ManyToManyField(OperationHours, related_name="hours")
     comments = models.ManyToManyField(Comments, related_name="comments")
     favorites = models.ManyToManyField(User, related_name="favorites")
+    appointments = models.ManyToManyField(Appointment, related_name="appointments")
+    messages = models.ManyToManyField(Message, related_name="messages")
 
     def __str__(self) -> str:
         return self.name

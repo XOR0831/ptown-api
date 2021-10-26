@@ -118,6 +118,15 @@ class AppointmentsSerializer(serializers.ModelSerializer):
         return data
         
 
+class AppointmentIDSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField()
+    class Meta:
+        model = Appointment
+        fields = [
+            "id"
+        ]
+
+
 class MessagesUserSerializer(serializers.ModelSerializer):
     user = serializers.IntegerField()
     class Meta:

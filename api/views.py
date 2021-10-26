@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
 from .serializers import (
     # Barbershop
+    AppointmentIDSerializer,
     AppointmentsSerializer,
     BarbershopSerializer, 
     BarbershopListSerializer,
@@ -25,6 +26,7 @@ from .serializers import (
     MyTokenObtainPairSerializer
 )
 from .models import (
+    Appointment,
     Barbershop, 
     Profile
 )
@@ -159,6 +161,24 @@ class BarbershopViewSet(viewsets.ModelViewSet):
         barbershop.save()
         barber = barbershop.appointments.all()
         return Response(AppointmentsSerializer(barber, many=True).data, status=status.HTTP_200_OK)
+
+    @extend_schema(
+        description='Cancel Appointment', 
+        methods=["POST"],
+        request=AppointmentIDSerializer,
+        responses=AppointmentsSerializer
+    )
+    @action(detail=True, methods=['POST'])
+    def cancel_appointment(self, request, pk=None):
+        serializer = AppointmentIDSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        appointment = Appointment.objects.get(pk=serializer.validated_data.get("id"))
+        barbershop = Barbershop.objects.get(pk=pk)
+        if appointment in barbershop.appointments.all():
+            barbershop.appointments.remove(appointment)
+        barbershop.save()
+        barbers = barbershop.appointments.all()
+        return Response(AppointmentsSerializer(barbers, many=True).data, status=status.HTTP_200_OK)
 
     @extend_schema(
         request=None,

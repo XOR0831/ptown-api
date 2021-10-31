@@ -214,7 +214,7 @@ class BarbershopViewSet(viewsets.ModelViewSet):
         barbershop = Barbershop.objects.get(pk=pk)
         barbershop.messages.add(message)
         barbershop.save()
-        barber = barbershop.messages.filter(user=message.user).order_by("created")
+        barber = barbershop.messages.filter(user=message.user).order_by("-created")
         return Response(MessagesListSerializer(barber, many=True).data, status=status.HTTP_200_OK)
 
     @extend_schema(
@@ -226,7 +226,7 @@ class BarbershopViewSet(viewsets.ModelViewSet):
         serializer = MessagesUserSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = User.objects.get(pk=serializer.validated_data.get("user"))
-        messages = Barbershop.objects.get(pk=pk).messages.filter(user=user).order_by("created")
+        messages = Barbershop.objects.get(pk=pk).messages.filter(user=user).order_by("-created")
         return Response(MessagesListSerializer(messages, many=True).data, status=status.HTTP_200_OK)
 
     @extend_schema(

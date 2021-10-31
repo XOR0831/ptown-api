@@ -179,6 +179,7 @@ class BarbershopSerializer(serializers.ModelSerializer):
 
 
 class BarbershopProfileSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField()
     class Meta:
         model = Barbershop
         fields = [

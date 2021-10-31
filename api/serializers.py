@@ -14,6 +14,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 
         # Add extra responses here
         data['id'] = self.user.id
+        data['type'] = self.user.profile.account_type
         return data
 
 

@@ -100,7 +100,21 @@ class CommentsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comments
         fields = "__all__"
+        
+        
+class AppointmentFilteredListUserSerializer(serializers.ListSerializer):
+    def to_representation(self, data):
+        data = data.filter(user=self.context['request'].user)
+        return super(FilteredListUserSerializer, self).to_representation(data)
 
+    
+class AppointmentsFilteredSerializer(serializers.ModelSerializer):
+    user = UserListSerializer(read_only=True)
+    class Meta:
+        model = Appointment
+        fields = "__all__"
+        list_serializer_class = AppointmentFilteredListUserSerializer
+        
 
 class AppointmentsSerializer(serializers.ModelSerializer):
     user = UserListSerializer(read_only=True)
@@ -223,7 +237,7 @@ class BarbershopListUserSerializer(serializers.ModelSerializer):
     hours = OperationHoursSerializer(many=True)
     comments = CommentsSerializer(many=True)
     favorites = UserListSerializer(many=True)
-    appointments = AppointmentsSerializer(many=True, read_only=True, source="users_appointment")
+    appointments = AppointmentsFilteredSerializer(many=True)
     messages = MessagesListSerializer(many=True)
 
     class Meta:

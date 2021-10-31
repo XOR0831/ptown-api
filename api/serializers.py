@@ -105,7 +105,7 @@ class CommentsSerializer(serializers.ModelSerializer):
 class AppointmentFilteredListUserSerializer(serializers.ListSerializer):
     def to_representation(self, data):
         data = data.filter(user=self.context['request'].user)
-        return super(FilteredListUserSerializer, self).to_representation(data)
+        return super(AppointmentFilteredListUserSerializer, self).to_representation(data)
 
     
 class AppointmentsFilteredSerializer(serializers.ModelSerializer):

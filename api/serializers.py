@@ -209,6 +209,8 @@ class BarbershopListSerializer(serializers.ModelSerializer):
     hours = OperationHoursSerializer(many=True)
     comments = CommentsSerializer(many=True)
     favorites = UserListSerializer(many=True)
+    appointments = AppointmentsSerializer(many=True)
+    messages = MessagesListSerializer(many=True)
 
     class Meta:
         model = Barbershop

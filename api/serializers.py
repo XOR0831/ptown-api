@@ -215,6 +215,20 @@ class BarbershopListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Barbershop
         fields = "__all__"
+        
+ 
+class BarbershopListUserSerializer(serializers.ModelSerializer):
+    amenities = AmenitiesSerializer(many=True)
+    services = ServicesSerializer(many=True)
+    hours = OperationHoursSerializer(many=True)
+    comments = CommentsSerializer(many=True)
+    favorites = UserListSerializer(many=True)
+    appointments = AppointmentsSerializer(many=True, read_only=True, source="users_appointment")
+    messages = MessagesListSerializer(many=True)
+
+    class Meta:
+        model = Barbershop
+        fields = "__all__"
 
 
 class BarbershopUpdateSerializer(serializers.ModelSerializer):

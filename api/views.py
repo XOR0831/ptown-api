@@ -188,6 +188,15 @@ class BarbershopViewSet(viewsets.ModelViewSet):
     def get_appointment(self, request, pk=None):
         barbershops = Barbershop.objects.get(pk=pk).appointments.all()
         return Response(AppointmentsSerializer(barbershops, many=True).data, status=status.HTTP_200_OK)
+    
+    @extend_schema(
+        request=None,
+        responses=BarbershopListSerializer
+    )
+    @action(detail=False, methods=['GET'])
+    def appointment_user(self, request):
+        barbershops = Barbershop.objects.filter(appointments__user=request.user)
+        return Response(BarbershopListSerializer(barbershops, many=True).data, status=status.HTTP_200_OK)
 
     @extend_schema(
         description='Add Message', 

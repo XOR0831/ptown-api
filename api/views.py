@@ -177,6 +177,7 @@ class BarbershopViewSet(viewsets.ModelViewSet):
         barbershop = Barbershop.objects.get(pk=pk)
         if appointment in barbershop.appointments.all():
             barbershop.appointments.remove(appointment)
+            appointment.delete()
         barbershop.save()
         barbers = barbershop.appointments.all()
         return Response(AppointmentsSerializer(barbers, many=True).data, status=status.HTTP_200_OK)

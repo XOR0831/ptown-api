@@ -195,7 +195,7 @@ class BarbershopViewSet(viewsets.ModelViewSet):
     )
     @action(detail=False, methods=['GET'])
     def appointment_user(self, request):
-        barbershops = Barbershop.objects.filter(appointments__user=request.user)
+        barbershops = Barbershop.objects.filter(appointments__user=request.user).distinct()
         return Response(BarbershopListSerializer(barbershops, many=True).data, status=status.HTTP_200_OK)
 
     @extend_schema(

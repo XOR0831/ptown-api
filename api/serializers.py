@@ -258,6 +258,14 @@ class BarbershopUpdateSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
     def save(self):
+        self.instance.name = self.validated_data.get("name", self.instance.name)
+        self.instance.description = self.validated_data.get("description", self.instance.description)
+        self.instance.address = self.validated_data.get("address", self.instance.address)
+        self.instance.contact_number = self.validated_data.get("contact_number", self.instance.contact_number)
+        self.instance.photo = self.validated_data.get("photo", self.instance.photo)
+        self.instance.latitude = self.validated_data.get("latitude", self.instance.latitude)
+        self.instance.longitude = self.validated_data.get("longitude", self.instance.longitude)
+        self.instance.verified = self.validated_data.get("verified", self.instance.verified)
         amenities_data = self.validated_data.get('amenities')
         services_data = self.validated_data.get('services')
         hours_data = self.validated_data.get('hours')

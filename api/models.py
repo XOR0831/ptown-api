@@ -74,6 +74,7 @@ class Appointment(models.Model):
     user = models.ForeignKey(User, on_delete=models.DO_NOTHING)
     date = models.DateField()
     time = models.TimeField()
+    status = models.CharField(max_length=20, default="pending")
 
     def __str__(self) -> str:
         return "{}: {} - {}".format(self.user.username, self.date.strftime("%A %d"), self.time.strftime("%H:%M")) 
@@ -104,6 +105,7 @@ class Barbershop(models.Model):
     contact_number = models.CharField(max_length=11, null=True, blank=True)
     photo = models.ImageField(upload_to='banners', storage=gd_storage, validators=[validate_file_extension], null=True, blank=True)
     rating = models.FloatField(default=0)
+    document = models.ImageField(upload_to='documents', storage=gd_storage, validators=[validate_file_extension], null=True, blank=True)
     latitude = models.FloatField()
     longitude = models.FloatField()
     verified = models.BooleanField(default=False)

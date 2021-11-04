@@ -37,20 +37,35 @@ class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
 
 
+class AppointmentViewSet(viewsets.ModelViewSet):
+    queryset = Appointment.objects.all()
+    serializer_class = AppointmentsSerializer
+    http_method_names = ['patch']
+
 class BarbershopFilter(filters.FilterSet):
 
     class Meta:
         model = Barbershop
-        fields = ["name", "address", "rating"]
+        fields = [
+            "name",
+            "description",
+            "address",
+            "contact_number",
+            "rating",
+            "verified",
+            "amenities__name",
+            "services__name",
+        ]
 
 
 class BarbershopViewSet(viewsets.ModelViewSet):
     """
     A viewset that provides the standard actions for Amenities object
     """
-    queryset = Barbershop.objects.all()
+    queryset = Barbershop.objects.filter(verified=True)
     serializer_class = BarbershopSerializer
     filter_backends = (filters.DjangoFilterBackend,)
+    permission_classes = [permissions.AllowAny]
     filterset_class = BarbershopFilter
     http_method_names = ['get', 'post', 'patch', 'delete', 'head', 'options', 'trace']
 
@@ -154,10 +169,10 @@ class BarbershopViewSet(viewsets.ModelViewSet):
     )
     @action(detail=True, methods=['POST'])
     def add_appointment(self, request, pk=None):
-        serializer = AppointmentsSerializer(data=request.data, context={'request': request})
+        barbershop = Barbershop.objects.get(pk=pk)
+        serializer = AppointmentsSerializer(data=request.data, context={'request': request, 'barbershop': barbershop})
         serializer.is_valid(raise_exception=True)
         appointment = serializer.save(user=request.user)
-        barbershop = Barbershop.objects.get(pk=pk)
         barbershop.appointments.add(appointment)
         barbershop.save()
         barber = barbershop.appointments.all()

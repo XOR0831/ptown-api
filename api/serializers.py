@@ -3,7 +3,7 @@ from django.db.models import Q
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from .models import Amenities, Appointment, Message, Services, OperationHours, Comments, Barbershop, Profile
-
+import datetime
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
@@ -125,9 +125,11 @@ class AppointmentsSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         user =  self.context['request'].user
+        barbershop =  self.context['barbershop']
         if Appointment.objects.filter(
-            Q(date=data["date"], time=data["time"]) |
-            Q(date=data["date"], user=user)
+            Q(date=data["date"], appointments=barbershop, user=user) |
+            Q(date=data["date"], time__range=(data["time"], (datetime.datetime.combine(datetime.date(1,1,1), data["time"]) + datetime.timedelta(minutes=59)).strftime("%H:%M:%S")), appointments=barbershop) |
+            Q(date=data["date"], time__range=((datetime.datetime.combine(datetime.date(1,1,1), data["time"]) - datetime.timedelta(minutes=59)).strftime("%H:%M:%S"), data["time"]), appointments=barbershop)
         ).exists():
             raise serializers.ValidationError("There is an existing appointment")
         return data
@@ -203,6 +205,7 @@ class BarbershopProfileSerializer(serializers.ModelSerializer):
 
 
 class BarbershopCreateSerializer(serializers.ModelSerializer):
+    document = serializers.ImageField(required=True)
     class Meta:
         model = Barbershop
         fields = [
@@ -211,6 +214,7 @@ class BarbershopCreateSerializer(serializers.ModelSerializer):
             "address",
             "contact_number",
             "photo",
+            "document",
             "rating",
             "latitude",
             "longitude",

@@ -117,6 +117,13 @@ class AppointmentsFilteredSerializer(serializers.ModelSerializer):
         list_serializer_class = AppointmentFilteredListUserSerializer
         
 
+class AppointmentsUpdateSerializer(serializers.ModelSerializer):
+    user = UserListSerializer(read_only=True)
+    class Meta:
+        model = Appointment
+        fields = "__all__"
+
+
 class AppointmentsSerializer(serializers.ModelSerializer):
     user = UserListSerializer(read_only=True)
     class Meta:

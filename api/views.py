@@ -9,6 +9,7 @@ from .serializers import (
     # Barbershop
     AppointmentIDSerializer,
     AppointmentsSerializer,
+    AppointmentsUpdateSerializer,
     BarbershopSerializer, 
     BarbershopListSerializer,
     BarbershopListUserSerializer,
@@ -39,7 +40,7 @@ class MyTokenObtainPairView(TokenObtainPairView):
 
 class AppointmentViewSet(viewsets.ModelViewSet):
     queryset = Appointment.objects.all()
-    serializer_class = AppointmentsSerializer
+    serializer_class = AppointmentsUpdateSerializer
     http_method_names = ['patch']
 
 class BarbershopFilter(filters.FilterSet):

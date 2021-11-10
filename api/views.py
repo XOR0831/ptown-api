@@ -63,7 +63,7 @@ class BarbershopViewSet(viewsets.ModelViewSet):
     """
     A viewset that provides the standard actions for Amenities object
     """
-    queryset = Barbershop.objects.filter(verified=True)
+    queryset = Barbershop.objects.all()
     serializer_class = BarbershopSerializer
     filter_backends = (filters.DjangoFilterBackend,)
     permission_classes = [permissions.AllowAny]
@@ -89,7 +89,7 @@ class BarbershopViewSet(viewsets.ModelViewSet):
         responses={200: BarbershopListSerializer}
     )
     def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
+        queryset = self.filter_queryset(self.get_queryset()).filter(verified=True)
 
         page = self.paginate_queryset(queryset)
         if page is not None:

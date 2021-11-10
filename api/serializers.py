@@ -222,6 +222,10 @@ class BarbershopCreateSerializer(serializers.ModelSerializer):
             "contact_number",
             "photo",
             "document",
+            "postal_code",
+            "street",
+            "barangay",
+            "city",
             "rating",
             "latitude",
             "longitude",
@@ -272,6 +276,10 @@ class BarbershopUpdateSerializer(serializers.ModelSerializer):
         self.instance.name = self.validated_data.get("name", self.instance.name)
         self.instance.description = self.validated_data.get("description", self.instance.description)
         self.instance.address = self.validated_data.get("address", self.instance.address)
+        self.instance.postal_code = self.validated_data.get("postal_code", self.instance.postal_code)
+        self.instance.street = self.validated_data.get("street", self.instance.street)
+        self.instance.barangay = self.validated_data.get("barangay", self.instance.barangay)
+        self.instance.city = self.validated_data.get("city", self.instance.city)
         self.instance.contact_number = self.validated_data.get("contact_number", self.instance.contact_number)
         self.instance.photo = self.validated_data.get("photo", self.instance.photo)
         self.instance.latitude = self.validated_data.get("latitude", self.instance.latitude)

@@ -109,13 +109,13 @@ class Barbershop(models.Model):
     latitude = models.FloatField()
     longitude = models.FloatField()
     verified = models.BooleanField(default=False)
-    amenities = models.ManyToManyField(Amenities, related_name="amenities")
-    services = models.ManyToManyField(Services, related_name="services")
-    hours = models.ManyToManyField(OperationHours, related_name="hours")
-    comments = models.ManyToManyField(Comments, related_name="comments")
-    favorites = models.ManyToManyField(User, related_name="favorites")
-    appointments = models.ManyToManyField(Appointment, related_name="appointments")
-    messages = models.ManyToManyField(Message, related_name="messages")
+    amenities = models.ManyToManyField(Amenities, related_name="amenities", blank=True)
+    services = models.ManyToManyField(Services, related_name="services", blank=True)
+    hours = models.ManyToManyField(OperationHours, related_name="hours", blank=True)
+    comments = models.ManyToManyField(Comments, related_name="comments", blank=True)
+    favorites = models.ManyToManyField(User, related_name="favorites", blank=True)
+    appointments = models.ManyToManyField(Appointment, related_name="appointments", blank=True)
+    messages = models.ManyToManyField(Message, related_name="messages", blank=True)
 
     def __str__(self) -> str:
         return self.name
@@ -127,7 +127,7 @@ class Profile(models.Model):
     photo = models.ImageField(upload_to='profiles', storage=gd_storage, validators=[validate_file_extension], null=True, blank=True)
     address = models.CharField(max_length=255, null=True, blank=True)
     account_type = models.CharField(max_length=5)
-    barbershop = models.ManyToManyField(Barbershop, related_name="shops")
+    barbershop = models.ManyToManyField(Barbershop, related_name="shops", blank=True)
 
     def __str__(self) -> str:
         return f"{self.user.first_name} {self.user.last_name}"
